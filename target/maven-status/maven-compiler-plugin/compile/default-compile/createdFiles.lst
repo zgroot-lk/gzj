@@ -1,0 +1,4 @@
+com/student/repository/AttendanceRepository.class
+com/student/entity/Attendance.class
+com/student/entity/Attendance$AttendanceStatus.class
+com/student/entity/Grade.class
