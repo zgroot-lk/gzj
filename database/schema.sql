@@ -1,9 +1,13 @@
 -- 学生管理系统数据库表结构
+-- 兼容 MySQL 8.0.44+
 
--- 设置 SQL 模式（兼容 MySQL 8.0+）
+-- 设置字符集和排序规则
+SET NAMES utf8mb4;
+
+-- 设置 SQL 模式（兼容 MySQL 8.0.44）
 SET sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
--- 禁用外键检查（创建表时）
+-- 禁用外键检查（创建表时，避免外键约束问题）
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 1. 班级信息表
