@@ -1,4 +1,29 @@
 -- 初始化测试数据
+-- 兼容 MySQL 8.0.44+
+
+-- 设置字符集（确保中文数据正确插入）
+SET NAMES utf8mb4;
+
+-- 禁用外键检查（插入数据时，避免外键约束问题）
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 清空现有数据（如果之前有数据，先清空）
+DELETE FROM todos;
+DELETE FROM grades;
+DELETE FROM attendance;
+DELETE FROM schedules;
+DELETE FROM student_records;
+DELETE FROM students;
+DELETE FROM classes;
+
+-- 重置自增ID（可选，如果需要从1开始）
+ALTER TABLE classes AUTO_INCREMENT = 1;
+ALTER TABLE students AUTO_INCREMENT = 1;
+ALTER TABLE student_records AUTO_INCREMENT = 1;
+ALTER TABLE schedules AUTO_INCREMENT = 1;
+ALTER TABLE attendance AUTO_INCREMENT = 1;
+ALTER TABLE grades AUTO_INCREMENT = 1;
+ALTER TABLE todos AUTO_INCREMENT = 1;
 
 -- 插入班级数据
 INSERT INTO classes (class_name, grade, department, student_count) VALUES
@@ -62,4 +87,20 @@ INSERT INTO todos (title, description, status, priority, assignee, due_date, rel
 ('班级活动策划', '组织2023级计算机1班团建活动', '待处理', '低', '班长', '2024-02-10', NULL, 1),
 ('学生转学手续', '处理学生李四的转学手续', '进行中', '紧急', '学籍处', '2024-01-25', 2, 1);
 
+-- 重新启用外键检查
+SET FOREIGN_KEY_CHECKS = 1;
 
+-- 验证数据插入成功
+SELECT 'classes' as table_name, COUNT(*) as count FROM classes
+UNION ALL
+SELECT 'students', COUNT(*) FROM students
+UNION ALL
+SELECT 'student_records', COUNT(*) FROM student_records
+UNION ALL
+SELECT 'schedules', COUNT(*) FROM schedules
+UNION ALL
+SELECT 'attendance', COUNT(*) FROM attendance
+UNION ALL
+SELECT 'grades', COUNT(*) FROM grades
+UNION ALL
+SELECT 'todos', COUNT(*) FROM todos;
