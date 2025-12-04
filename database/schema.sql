@@ -1,5 +1,11 @@
 -- 学生管理系统数据库表结构
 
+-- 设置 SQL 模式（兼容 MySQL 8.0+）
+SET sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- 禁用外键检查（创建表时）
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- 1. 班级信息表
 CREATE TABLE IF NOT EXISTS classes (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -8,8 +14,8 @@ CREATE TABLE IF NOT EXISTS classes (
     department VARCHAR(50) COMMENT '部门/系别',
     teacher_id INT COMMENT '班主任ID',
     student_count INT DEFAULT 0 COMMENT '学生人数',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_grade (grade),
     INDEX idx_department (department)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='班级信息表';
@@ -27,8 +33,8 @@ CREATE TABLE IF NOT EXISTS students (
     class_id INT NOT NULL COMMENT '班级ID',
     enrollment_date DATE COMMENT '入学日期',
     status ENUM('在读', '休学', '退学', '毕业') DEFAULT '在读' COMMENT '状态',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE RESTRICT,
     INDEX idx_student_no (student_no),
     INDEX idx_class_id (class_id),
@@ -48,8 +54,8 @@ CREATE TABLE IF NOT EXISTS student_records (
     guardian_phone VARCHAR(20) COMMENT '监护人电话',
     previous_school VARCHAR(100) COMMENT '原毕业学校',
     record_status ENUM('正常', '转学', '休学', '退学') DEFAULT '正常' COMMENT '学籍状态',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     INDEX idx_student_id (student_id),
     INDEX idx_record_status (record_status)
@@ -67,8 +73,8 @@ CREATE TABLE IF NOT EXISTS schedules (
     classroom VARCHAR(50) COMMENT '教室',
     semester VARCHAR(20) COMMENT '学期',
     academic_year VARCHAR(20) COMMENT '学年',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
     INDEX idx_class_id (class_id),
     INDEX idx_semester (semester),
@@ -84,8 +90,8 @@ CREATE TABLE IF NOT EXISTS attendance (
     status ENUM('出勤', '迟到', '早退', '缺勤', '请假') NOT NULL COMMENT '考勤状态',
     course_name VARCHAR(100) COMMENT '课程名称',
     remark TEXT COMMENT '备注',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
     INDEX idx_student_id (student_id),
@@ -107,8 +113,8 @@ CREATE TABLE IF NOT EXISTS grades (
     academic_year VARCHAR(20) COMMENT '学年',
     exam_date DATE COMMENT '考试日期',
     remark TEXT COMMENT '备注',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
     INDEX idx_student_id (student_id),
@@ -126,11 +132,11 @@ CREATE TABLE IF NOT EXISTS todos (
     priority ENUM('低', '中', '高', '紧急') DEFAULT '中' COMMENT '优先级',
     assignee VARCHAR(50) COMMENT '负责人',
     due_date DATE COMMENT '截止日期',
-    completed_at TIMESTAMP NULL COMMENT '完成时间',
+    completed_at DATETIME NULL COMMENT '完成时间',
     related_student_id INT COMMENT '关联学生ID',
     related_class_id INT COMMENT '关联班级ID',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (related_student_id) REFERENCES students(id) ON DELETE SET NULL,
     FOREIGN KEY (related_class_id) REFERENCES classes(id) ON DELETE SET NULL,
     INDEX idx_status (status),
@@ -140,4 +146,6 @@ CREATE TABLE IF NOT EXISTS todos (
     INDEX idx_related_class_id (related_class_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='待办事项表';
 
+-- 重新启用外键检查
+SET FOREIGN_KEY_CHECKS = 1;
 
