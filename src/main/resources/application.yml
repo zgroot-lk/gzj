@@ -17,6 +17,12 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
+  # Jackson配置：支持下划线命名到驼峰命名的自动转换
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    date-format: yyyy-MM-dd
+    time-zone: Asia/Shanghai
+
 server:
   port: 3001
   servlet:

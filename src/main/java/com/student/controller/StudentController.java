@@ -93,14 +93,83 @@ public class StudentController {
     }
 
     @PostMapping
-    public Result<Student> create(@RequestBody Student student) {
-        return Result.success(studentService.save(student));
+    public Result<Student> create(@RequestBody java.util.Map<String, Object> data) {
+        try {
+            Student student = convertToStudent(data);
+            return Result.success(studentService.save(student));
+        } catch (Exception e) {
+            return Result.error("创建失败: " + e.getMessage());
+        }
+    }
+
+    private Student convertToStudent(java.util.Map<String, Object> data) {
+        Student student = new Student();
+        
+        // 处理下划线命名到驼峰命名
+        if (data.containsKey("student_no")) {
+            student.setStudentNo((String) data.get("student_no"));
+        }
+        if (data.containsKey("name")) {
+            student.setName((String) data.get("name"));
+        }
+        if (data.containsKey("gender")) {
+            String genderStr = (String) data.get("gender");
+            if ("男".equals(genderStr)) {
+                student.setGender(Student.Gender.男);
+            } else if ("女".equals(genderStr)) {
+                student.setGender(Student.Gender.女);
+            }
+        }
+        if (data.containsKey("birth_date") && data.get("birth_date") != null) {
+            String birthDateStr = (String) data.get("birth_date");
+            student.setBirthDate(java.time.LocalDate.parse(birthDateStr));
+        }
+        if (data.containsKey("phone")) {
+            student.setPhone((String) data.get("phone"));
+        }
+        if (data.containsKey("email")) {
+            student.setEmail((String) data.get("email"));
+        }
+        if (data.containsKey("address")) {
+            student.setAddress((String) data.get("address"));
+        }
+        if (data.containsKey("class_id")) {
+            Object classIdObj = data.get("class_id");
+            if (classIdObj instanceof Integer) {
+                student.setClassId((Integer) classIdObj);
+            } else if (classIdObj instanceof String) {
+                student.setClassId(Integer.parseInt((String) classIdObj));
+            }
+        }
+        if (data.containsKey("enrollment_date") && data.get("enrollment_date") != null) {
+            String enrollmentDateStr = (String) data.get("enrollment_date");
+            student.setEnrollmentDate(java.time.LocalDate.parse(enrollmentDateStr));
+        }
+        if (data.containsKey("status")) {
+            String statusStr = (String) data.get("status");
+            if ("在读".equals(statusStr)) {
+                student.setStatus(Student.StudentStatus.在读);
+            } else if ("休学".equals(statusStr)) {
+                student.setStatus(Student.StudentStatus.休学);
+            } else if ("退学".equals(statusStr)) {
+                student.setStatus(Student.StudentStatus.退学);
+            } else if ("毕业".equals(statusStr)) {
+                student.setStatus(Student.StudentStatus.毕业);
+            }
+        }
+        
+        return student;
     }
 
     @PutMapping("/{id}")
-    public Result<Student> update(@PathVariable Integer id, @RequestBody Student student) {
-        student.setId(id);
-        return Result.success(studentService.update(student));
+    public Result<Student> update(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> data) {
+        try {
+            Student student = convertToStudent(data);
+            student.setId(id);
+            return Result.success(studentService.update(student));
+        } catch (Exception e) {
+            return Result.error("更新失败: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

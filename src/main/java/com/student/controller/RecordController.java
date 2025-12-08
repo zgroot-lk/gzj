@@ -147,14 +147,75 @@ public class RecordController {
     }
 
     @PostMapping
-    public Result<StudentRecord> create(@RequestBody StudentRecord record) {
-        return Result.success(recordService.save(record));
+    public Result<StudentRecord> create(@RequestBody java.util.Map<String, Object> data) {
+        try {
+            StudentRecord record = convertToStudentRecord(data);
+            return Result.success(recordService.save(record));
+        } catch (Exception e) {
+            return Result.error("创建失败: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public Result<StudentRecord> update(@PathVariable Integer id, @RequestBody StudentRecord record) {
-        record.setId(id);
-        return Result.success(recordService.update(record));
+    public Result<StudentRecord> update(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> data) {
+        try {
+            StudentRecord record = convertToStudentRecord(data);
+            record.setId(id);
+            return Result.success(recordService.update(record));
+        } catch (Exception e) {
+            return Result.error("更新失败: " + e.getMessage());
+        }
+    }
+
+    private StudentRecord convertToStudentRecord(java.util.Map<String, Object> data) {
+        StudentRecord record = new StudentRecord();
+        
+        if (data.containsKey("student_id")) {
+            Object obj = data.get("student_id");
+            if (obj instanceof Integer) {
+                record.setStudentId((Integer) obj);
+            } else if (obj instanceof String) {
+                record.setStudentId(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("id_card")) {
+            record.setIdCard((String) data.get("id_card"));
+        }
+        if (data.containsKey("nationality")) {
+            record.setNationality((String) data.get("nationality"));
+        }
+        if (data.containsKey("ethnicity")) {
+            record.setEthnicity((String) data.get("ethnicity"));
+        }
+        if (data.containsKey("political_status")) {
+            record.setPoliticalStatus((String) data.get("political_status"));
+        }
+        if (data.containsKey("health_status")) {
+            record.setHealthStatus((String) data.get("health_status"));
+        }
+        if (data.containsKey("guardian_name")) {
+            record.setGuardianName((String) data.get("guardian_name"));
+        }
+        if (data.containsKey("guardian_phone")) {
+            record.setGuardianPhone((String) data.get("guardian_phone"));
+        }
+        if (data.containsKey("previous_school")) {
+            record.setPreviousSchool((String) data.get("previous_school"));
+        }
+        if (data.containsKey("record_status")) {
+            String statusStr = (String) data.get("record_status");
+            if ("正常".equals(statusStr)) {
+                record.setRecordStatus(StudentRecord.RecordStatus.正常);
+            } else if ("转学".equals(statusStr)) {
+                record.setRecordStatus(StudentRecord.RecordStatus.转学);
+            } else if ("休学".equals(statusStr)) {
+                record.setRecordStatus(StudentRecord.RecordStatus.休学);
+            } else if ("退学".equals(statusStr)) {
+                record.setRecordStatus(StudentRecord.RecordStatus.退学);
+            }
+        }
+        
+        return record;
     }
 
     @DeleteMapping("/{id}")

@@ -41,14 +41,59 @@ public class ClassController {
     }
 
     @PostMapping
-    public Result<Class> create(@RequestBody Class clazz) {
-        return Result.success(classService.save(clazz));
+    public Result<Class> create(@RequestBody java.util.Map<String, Object> data) {
+        try {
+            Class clazz = convertToClass(data);
+            return Result.success(classService.save(clazz));
+        } catch (Exception e) {
+            return Result.error("创建失败: " + e.getMessage());
+        }
+    }
+
+    private Class convertToClass(java.util.Map<String, Object> data) {
+        Class clazz = new Class();
+        
+        // 处理下划线命名到驼峰命名
+        if (data.containsKey("class_name")) {
+            clazz.setClassName((String) data.get("class_name"));
+        }
+        if (data.containsKey("grade")) {
+            clazz.setGrade((String) data.get("grade"));
+        }
+        if (data.containsKey("department")) {
+            clazz.setDepartment((String) data.get("department"));
+        }
+        if (data.containsKey("teacher_id")) {
+            Object teacherIdObj = data.get("teacher_id");
+            if (teacherIdObj instanceof Integer) {
+                clazz.setTeacherId((Integer) teacherIdObj);
+            } else if (teacherIdObj instanceof String && !((String) teacherIdObj).isEmpty()) {
+                clazz.setTeacherId(Integer.parseInt((String) teacherIdObj));
+            }
+        }
+        if (data.containsKey("student_count")) {
+            Object studentCountObj = data.get("student_count");
+            if (studentCountObj instanceof Integer) {
+                clazz.setStudentCount((Integer) studentCountObj);
+            } else if (studentCountObj instanceof String && !((String) studentCountObj).isEmpty()) {
+                clazz.setStudentCount(Integer.parseInt((String) studentCountObj));
+            }
+        } else {
+            clazz.setStudentCount(0);
+        }
+        
+        return clazz;
     }
 
     @PutMapping("/{id}")
-    public Result<Class> update(@PathVariable Integer id, @RequestBody Class clazz) {
-        clazz.setId(id);
-        return Result.success(classService.update(clazz));
+    public Result<Class> update(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> data) {
+        try {
+            Class clazz = convertToClass(data);
+            clazz.setId(id);
+            return Result.success(classService.update(clazz));
+        } catch (Exception e) {
+            return Result.error("更新失败: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

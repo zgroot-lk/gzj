@@ -58,14 +58,70 @@ public class ScheduleController {
     }
 
     @PostMapping
-    public Result<Schedule> create(@RequestBody Schedule schedule) {
-        return Result.success(scheduleService.save(schedule));
+    public Result<Schedule> create(@RequestBody java.util.Map<String, Object> data) {
+        try {
+            Schedule schedule = convertToSchedule(data);
+            return Result.success(scheduleService.save(schedule));
+        } catch (Exception e) {
+            return Result.error("创建失败: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public Result<Schedule> update(@PathVariable Integer id, @RequestBody Schedule schedule) {
-        schedule.setId(id);
-        return Result.success(scheduleService.update(schedule));
+    public Result<Schedule> update(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> data) {
+        try {
+            Schedule schedule = convertToSchedule(data);
+            schedule.setId(id);
+            return Result.success(scheduleService.update(schedule));
+        } catch (Exception e) {
+            return Result.error("更新失败: " + e.getMessage());
+        }
+    }
+
+    private Schedule convertToSchedule(java.util.Map<String, Object> data) {
+        Schedule schedule = new Schedule();
+        
+        if (data.containsKey("class_id")) {
+            Object obj = data.get("class_id");
+            if (obj instanceof Integer) {
+                schedule.setClassId((Integer) obj);
+            } else if (obj instanceof String) {
+                schedule.setClassId(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("course_name")) {
+            schedule.setCourseName((String) data.get("course_name"));
+        }
+        if (data.containsKey("teacher_name")) {
+            schedule.setTeacherName((String) data.get("teacher_name"));
+        }
+        if (data.containsKey("day_of_week")) {
+            Object obj = data.get("day_of_week");
+            if (obj instanceof Integer) {
+                schedule.setDayOfWeek((Integer) obj);
+            } else if (obj instanceof String) {
+                schedule.setDayOfWeek(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("start_time") && data.get("start_time") != null) {
+            String timeStr = (String) data.get("start_time");
+            schedule.setStartTime(java.time.LocalTime.parse(timeStr));
+        }
+        if (data.containsKey("end_time") && data.get("end_time") != null) {
+            String timeStr = (String) data.get("end_time");
+            schedule.setEndTime(java.time.LocalTime.parse(timeStr));
+        }
+        if (data.containsKey("classroom")) {
+            schedule.setClassroom((String) data.get("classroom"));
+        }
+        if (data.containsKey("semester")) {
+            schedule.setSemester((String) data.get("semester"));
+        }
+        if (data.containsKey("academic_year")) {
+            schedule.setAcademicYear((String) data.get("academic_year"));
+        }
+        
+        return schedule;
     }
 
     @DeleteMapping("/{id}")

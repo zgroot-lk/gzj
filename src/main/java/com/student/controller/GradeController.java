@@ -77,14 +77,82 @@ public class GradeController {
     }
 
     @PostMapping
-    public Result<Grade> create(@RequestBody Grade grade) {
-        return Result.success(gradeService.save(grade));
+    public Result<Grade> create(@RequestBody java.util.Map<String, Object> data) {
+        try {
+            Grade grade = convertToGrade(data);
+            return Result.success(gradeService.save(grade));
+        } catch (Exception e) {
+            return Result.error("创建失败: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public Result<Grade> update(@PathVariable Integer id, @RequestBody Grade grade) {
-        grade.setId(id);
-        return Result.success(gradeService.update(grade));
+    public Result<Grade> update(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> data) {
+        try {
+            Grade grade = convertToGrade(data);
+            grade.setId(id);
+            return Result.success(gradeService.update(grade));
+        } catch (Exception e) {
+            return Result.error("更新失败: " + e.getMessage());
+        }
+    }
+
+    private Grade convertToGrade(java.util.Map<String, Object> data) {
+        Grade grade = new Grade();
+        
+        if (data.containsKey("student_id")) {
+            Object obj = data.get("student_id");
+            if (obj instanceof Integer) {
+                grade.setStudentId((Integer) obj);
+            } else if (obj instanceof String) {
+                grade.setStudentId(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("class_id")) {
+            Object obj = data.get("class_id");
+            if (obj instanceof Integer) {
+                grade.setClassId((Integer) obj);
+            } else if (obj instanceof String) {
+                grade.setClassId(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("course_name")) {
+            grade.setCourseName((String) data.get("course_name"));
+        }
+        if (data.containsKey("exam_type")) {
+            grade.setExamType((String) data.get("exam_type"));
+        }
+        if (data.containsKey("score")) {
+            Object scoreObj = data.get("score");
+            if (scoreObj instanceof Number) {
+                grade.setScore(new java.math.BigDecimal(scoreObj.toString()));
+            } else if (scoreObj instanceof String && !((String) scoreObj).isEmpty()) {
+                grade.setScore(new java.math.BigDecimal((String) scoreObj));
+            }
+        }
+        if (data.containsKey("full_score")) {
+            Object fullScoreObj = data.get("full_score");
+            if (fullScoreObj instanceof Number) {
+                grade.setFullScore(new java.math.BigDecimal(fullScoreObj.toString()));
+            } else if (fullScoreObj instanceof String && !((String) fullScoreObj).isEmpty()) {
+                grade.setFullScore(new java.math.BigDecimal((String) fullScoreObj));
+            }
+        }
+        if (data.containsKey("semester")) {
+            grade.setSemester((String) data.get("semester"));
+        }
+        if (data.containsKey("academic_year")) {
+            grade.setAcademicYear((String) data.get("academic_year"));
+        }
+        if (data.containsKey("exam_date") && data.get("exam_date") != null) {
+            String dateStr = (String) data.get("exam_date");
+            grade.setExamDate(java.time.LocalDate.parse(dateStr));
+        }
+        if (data.containsKey("remark")) {
+            grade.setRemark((String) data.get("remark"));
+        }
+        
+        return grade;
     }
 
     @DeleteMapping("/{id}")

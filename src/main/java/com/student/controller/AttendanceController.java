@@ -76,14 +76,71 @@ public class AttendanceController {
     }
 
     @PostMapping
-    public Result<Attendance> create(@RequestBody Attendance attendance) {
-        return Result.success(attendanceService.save(attendance));
+    public Result<Attendance> create(@RequestBody java.util.Map<String, Object> data) {
+        try {
+            Attendance attendance = convertToAttendance(data);
+            return Result.success(attendanceService.save(attendance));
+        } catch (Exception e) {
+            return Result.error("创建失败: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public Result<Attendance> update(@PathVariable Integer id, @RequestBody Attendance attendance) {
-        attendance.setId(id);
-        return Result.success(attendanceService.update(attendance));
+    public Result<Attendance> update(@PathVariable Integer id, @RequestBody java.util.Map<String, Object> data) {
+        try {
+            Attendance attendance = convertToAttendance(data);
+            attendance.setId(id);
+            return Result.success(attendanceService.update(attendance));
+        } catch (Exception e) {
+            return Result.error("更新失败: " + e.getMessage());
+        }
+    }
+
+    private Attendance convertToAttendance(java.util.Map<String, Object> data) {
+        Attendance attendance = new Attendance();
+        
+        if (data.containsKey("student_id")) {
+            Object obj = data.get("student_id");
+            if (obj instanceof Integer) {
+                attendance.setStudentId((Integer) obj);
+            } else if (obj instanceof String) {
+                attendance.setStudentId(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("class_id")) {
+            Object obj = data.get("class_id");
+            if (obj instanceof Integer) {
+                attendance.setClassId((Integer) obj);
+            } else if (obj instanceof String) {
+                attendance.setClassId(Integer.parseInt((String) obj));
+            }
+        }
+        if (data.containsKey("attendance_date") && data.get("attendance_date") != null) {
+            String dateStr = (String) data.get("attendance_date");
+            attendance.setAttendanceDate(java.time.LocalDate.parse(dateStr));
+        }
+        if (data.containsKey("status")) {
+            String statusStr = (String) data.get("status");
+            if ("出勤".equals(statusStr)) {
+                attendance.setStatus(Attendance.AttendanceStatus.出勤);
+            } else if ("迟到".equals(statusStr)) {
+                attendance.setStatus(Attendance.AttendanceStatus.迟到);
+            } else if ("早退".equals(statusStr)) {
+                attendance.setStatus(Attendance.AttendanceStatus.早退);
+            } else if ("缺勤".equals(statusStr)) {
+                attendance.setStatus(Attendance.AttendanceStatus.缺勤);
+            } else if ("请假".equals(statusStr)) {
+                attendance.setStatus(Attendance.AttendanceStatus.请假);
+            }
+        }
+        if (data.containsKey("course_name")) {
+            attendance.setCourseName((String) data.get("course_name"));
+        }
+        if (data.containsKey("remark")) {
+            attendance.setRemark((String) data.get("remark"));
+        }
+        
+        return attendance;
     }
 
     @DeleteMapping("/{id}")
